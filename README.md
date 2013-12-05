@@ -20,7 +20,9 @@ As user siemenr do the following:
 ~~~
 source ~/.virtualenvs/development/bin/activate
 /home/siemenr/houseware/bridge.py`
-cd /home/siemenr/houseware/hubapp && node app
+cd /home/siemenr/houseware/hubapp
+npm install
+node app
 ~~~
 
 Troubleshooting
