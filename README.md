@@ -31,4 +31,3 @@ Troubleshooting
 * reset the arduino
 * unplug peripherals from the hub and then plug them back in
 * remove the sensor.log file and then touch a new one of the same name
-* pray
