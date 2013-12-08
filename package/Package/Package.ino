@@ -1,4 +1,4 @@
-// HouseWare Hub Firmware
+// HouseWare Package Firmware
 // Created by Andrew Fugier
 
 // Includes
@@ -132,3 +132,4 @@ void loop() {
 
   delay(DELAY);
 }
+
