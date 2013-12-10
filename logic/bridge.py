@@ -1,64 +1,83 @@
 #!/usr/bin/env python
 
-# Using this module to invesigate solutions to concurrency issues.
+import sys
+import pika
 import time
-
 import serial
 import json
+import Queue
+import threading
 
-# Open a serial connection.
-print("[Bridge] Opening a serial connection to the package...")
-ser = serial.Serial('/dev/ttyUSB0', 9600)
+package_name = str(sys.argv[1])
 
-#ser.write(bytes('{"sys":"rst"}', "ascii"))
-#print("Sent reset request.")
+running = True
 
-#print(bytes.decode(ser.readline()).rstrip("\n"))
+to_hw = Queue.Queue()
+from_hw = Queue.Queue()
 
-# write a request for the system firmware version.
-#ser.write(bytes('{"sys":"ver"}', "ascii"))
-#print("Sent version request.")
+credentials = pika.PlainCredentials('hub', 'HubWub!')
 
-# Read the response from the system. Display the result.
-#version_value = bytes.decode(ser.readline()).rstrip("\n")
-#print(version_value)
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+        'localhost',
+        5672,
+        '/',
+        credentials))
 
-print("[Bridge] Entering request/response loop...\n")
+channel = connection.channel()
 
-while True:
+print ' [*] Waiting for messages. To exit press CTRL+C'
 
-    # Write a request to the door sensor.
-    ser.write(bytes('{"req":04}', "ascii"))
+def broadcast_callback(ch, method, properties, body):
+    print " [x] Received message from broadcast: %r" % (body,)
+    if (str(body) == 'kill'):
+        running = False
+    else:
+        to_hw.put_nowait(body)
 
-    # Read the response from the door sensor. Display the result.
-    door_value = json.loads(bytes.decode(ser.readline()).rstrip("\n"))['dat'].split(":")[1]
-    print("\tDoor: {}".format(door_value))
+def package_callback(ch, method, properties, body):
+    print " [x] Received message for package: %r" % (body,)
+    if (str(body) == 'kill'):
+        running = False
+    else:
+        to_hw.put_nowait(body)
 
-    # Write a request to the light sensor.
-    ser.write(bytes('{"req":50}', "ascii"))
+channel.basic_consume(broadcast_callback,
+                      queue='package.bcast',
+                      no_ack=True)
 
-    # Read the response from the light sensor. Display the result.
-    luminosity_value = json.loads(bytes.decode(ser.readline()).rstrip("\n"))['dat'].split(":")[1]
-    print("\tLuminosity: {}".format(luminosity_value))
+channel.basic_consume(package_callback,
+                      queue='package.' + package_name,
+                      no_ack=True)
 
-    # Write a request to the temperature sensor.
-    ser.write(bytes('{"req":51}', "ascii"))
+rabbit = threading.Thread(target=channel.start_consuming)
 
-    # Read the response from the temperature sensor. Display the result.
-    temperature_value = json.loads(bytes.decode(ser.readline()).rstrip("\n"))['dat'].split(":")[1]
-    print("\tTemperature: {}\n".format(temperature_value))
+rabbit.start()
+print " [*] RabbitMQ thread initiated."
 
-    sensor_dict = {'door': door_value, 'luminosity': luminosity_value, 'temperature': temperature_value}
+package = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+print " [*] Serial connection with hardware established."
 
-    # Open the sensor log for appending, write to it, close the file.
-    sensorlog = open("sensor.log", "a")
-    #sensorlog.write('{"door":' + door_value + ',"luminosity":' + luminosity_value + ',"temperature":' + temperature_value + '}')
-    sensorlog.write(str(json.dumps(sensor_dict)) + "\n")
-    sensorlog.close()
-    print("[Bridge] Wrote data to file\n")
+print " [*] Entering main loop."
+while running:
 
-    # Wait one second in an attempt to prevent reading wrong values next loop.
-    time.sleep(1)
+    if (not(to_hw.empty())):
+        msg = str(to_hw.get_nowait())
+        package.write(msg)
+        print " [*] Wrote message to hardware: " + msg
 
-# Close the serial connection.
-ser.close()
+    hw_msg = str(package.readline())
+    if (hw_msg != ""):
+        from_hw.put_nowait(hw_msg)
+
+    if (not(from_hw.empty())):
+        message =  str(from_hw.get_nowait())
+        print " [x] Got message from hardware: " + message
+        channel.basic_publish(exchange='hub',
+            routing_key='logic.package.' + package_name,
+            body=message)
+
+package.close()
+channel.close()
+connection.close()
+del rabbit
+print ' [*] Thread object deleted. Connections closed.'
