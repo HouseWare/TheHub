@@ -17,41 +17,49 @@ from_hw = Queue.Queue()
 
 credentials = pika.PlainCredentials('hub', 'HubWub!')
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(
+callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
         'localhost',
         5672,
         '/',
         credentials))
 
-channel = connection.channel()
+publish_connection = pika.BlockingConnection(pika.ConnectionParameters(
+        'localhost',
+        5672,
+        '/',
+        credentials))
+
+callback_channel = callback_connection.channel()
+publish_channel = publish_connection.channel()
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 
 def broadcast_callback(ch, method, properties, body):
     print " [x] Received message from broadcast: %r" % (body,)
     if (str(body) == 'kill'):
-        running = False
-    else:
-        to_hw.put_nowait(body)
+        callback_channel.stop_consuming()
+    #else:
+    to_hw.put_nowait(body)
 
 def package_callback(ch, method, properties, body):
     print " [x] Received message for package: %r" % (body,)
     if (str(body) == 'kill'):
-        running = False
-    else:
-        to_hw.put_nowait(body)
+        callback_channel.stop_consuming()
+    #else:
+    to_hw.put_nowait(body)
 
-channel.basic_consume(broadcast_callback,
+callback_channel.basic_consume(broadcast_callback,
                       queue='package.bcast',
                       no_ack=True)
 
-channel.basic_consume(package_callback,
+callback_channel.basic_consume(package_callback,
                       queue='package.' + package_name,
                       no_ack=True)
 
-rabbit = threading.Thread(target=channel.start_consuming)
+rabbit = threading.Thread(target=callback_channel.start_consuming)
 
 rabbit.start()
+
 print " [*] RabbitMQ thread initiated."
 
 package = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
@@ -60,10 +68,14 @@ print " [*] Serial connection with hardware established."
 print " [*] Entering main loop."
 while running:
 
+    print "running=" + str(running)
     if (not(to_hw.empty())):
         msg = str(to_hw.get_nowait())
-        package.write(msg)
-        print " [*] Wrote message to hardware: " + msg
+        if (msg == 'kill'):
+            running = False
+        else:
+            package.write(msg)
+            print " [*] Wrote message to hardware: " + msg
 
     hw_msg = str(package.readline())
     if (hw_msg != ""):
@@ -72,12 +84,13 @@ while running:
     if (not(from_hw.empty())):
         message =  str(from_hw.get_nowait())
         print " [x] Got message from hardware: " + message
-        channel.basic_publish(exchange='hub',
+        publish_channel.basic_publish(exchange='hub',
             routing_key='logic.package.' + package_name,
             body=message)
 
 package.close()
-channel.close()
-connection.close()
+publish_channel.close()
+callback_connection.close()
+publish_connection.close()
 del rabbit
 print ' [*] Thread object deleted. Connections closed.'
