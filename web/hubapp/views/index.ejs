@@ -1,115 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <!-- Meta information -->
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="description" content="">
-        <meta name="author" content="">
-
-        <title><%= title %></title>
-
-        <!-- Bootstrap core CSS -->
-        <%- css('bootstrap.min') %>
-
-        <!-- Custom styles for this template -->
-        <%- css('style') %>
-
-        <!-- Just for debugging purposes. Don't actually copy this line! -->
-        <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
-        <![endif]-->
-    </head>
-
-    <body>
-
-        <div class="container">
-            <div class="jumbotron">
-                <!--
-                <h1><%= title %></h1>
-                <div class="row">
-                    <div class="col-sm-6 col-md-3">
-                        <img src="holder.js/96x96/auto/#555:#ffffff/text:Doors" alt="Doors" class="img-thumbnail img-responsive">
-                    </div>
-                    <div class="col-sm-6 col-md-3">
-                        <img src="holder.js/96x96/auto/#555:#ffffff/text:Luminosity" alt="Luminosity" class="img-thumbnail img-responsive">
-                    </div>
-                    <div class="col-sm-6 col-md-3">
-                        <img src="holder.js/96x96/auto/#555:#ffffff/text:Temperature" alt="Temperature" class="img-thumbnail img-responsive">
-                    </div>
-                    <div class="col-sm-6 col-md-3">
-                        <img src="holder.js/96x96/auto/#555:#ffffff/text:Lights" alt="Lights" class="img-thumbnail img-responsive">
-                    </div>
-                </div>
-                -->
-                <h1>Sensor Data</h1>
-                <p><span id="door"></span></p>
-                <p><span id="luminosity"></span></p>
-                <p><span id="temperature"></span></p>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <h2>Light #1</h2>
-                        <button type="button" class="btn btn-success" onclick="light_one(true)">On</button><br/>
-                        <button type="button" class="btn btn-danger" onclick="light_one(false)">Off</button><br/>
-                    </div>
-                    <div class="col-sm-6">
-                        <h2>Light #2</h2>
-                        <button type="button" class="btn btn-success" onclick="light_three(true)">On</button><br/>
-                        <button type="button" class="btn btn-danger" onclick="light_three(false)">Off</button><br/>
-                    </div>
-                </div>
-            </div>
-        </div> <!-- /container -->
-
-        <!-- Bootstrap core JavaScript
-        ================================================== -->
-        <!-- Placed at the end of the document so the pages load faster -->
-        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-        <%- js('bootstrap.min') %>
-        <%- js('holder') %>
-        <%- js('lights') %>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-            var socket = io.connect();
-            socket.on('door', function (data) {
-                //console.log(data);
-                if (data == 1){
-                    $("#door").html("The door is open.");
-                }
-                else{
-                    $("#door").html("The door is closed.");
-                }
-            //socket.emit('my other event', { my: 'data' });
-            });
-            socket.on('luminosity', function (data) {
-                //console.log(data);
-                if (data < 10) {
-                    $("#luminosity").html("The room is dark.");
-                }
-                else if (data < 200){
-                    $("#luminosity").html("The room is dim.");
-                }
-                else if (data < 500){
-                    $("#luminosity").html("The room is lit.");
-                }
-                else if (data < 800){
-                    $("#luminosity").html("The room is well lit.");
-                }
-                else {
-                    $("#luminosity").html("The room is bright.");
-                }
-            //socket.emit('my other event', { my: 'data' });
-            });
-            socket.on('temperature', function (data) {
-                //console.log(data);
-                $("#temperature").html("The room temperature is " + Math.round(data/(2.2)) + "&deg; F.");
-            //socket.emit('my other event', { my: 'data' });
-            });
-        </script>
-    </body>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <meta http-equiv="refresh" content="30">
+  </head>
+  <body>
+    <h1><a href="http://www.house-ware.co/" target="_blank" style="text-decoration: none"><%= title %></a></h1>
+    <p>Welcome to <%= title %></p>
+    <table>
+      <tr>
+        <td>Door</td>
+        <td><%= door %></td>
+     </tr>
+     <tr>
+        <td>Light</td>
+        <td><%= light %></td>
+     </tr>
+     <tr>
+        <td>Temperature</td>
+        <td><%= temperature %></td>
+     </tr>
+     <tr>
+        <td>Battery</td>
+        <td><%= battery %></td>
+     </tr>
+    </table>
+    <br>
+    <form action="">
+      <input type="button" value="Refresh">
+    </form>
+    <br>
+    <p>Version <%= version %></p>
+  </body>
 </html>
