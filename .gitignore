@@ -34,3 +34,7 @@ results
 build
 
 node_modules
+
+#python things
+*.pyc
+

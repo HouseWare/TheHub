@@ -1,27 +1,30 @@
 #!/usr/bin/env python
 
 import pika
-import package
+from package import Package
 import time
 import threading
 from subprocess import Popen
+import Queue
+import logging
 
+event_queue = Queue.Queue()
 
 # RabbitMQ conenction info:
 credentials = pika.PlainCredentials('hub', 'HubWub!')
-connection = pika.BlockingConnection(pika.ConnectionParameters(
+callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
         'localhost',
         5672,
         '/',
         credentials))
-callback_channel = connection.channel()
+callback_channel = callback_connection.channel()
 
 bcast_connection = pika.BlockingConnection(pika.ConnectionParameters(
         'localhost',
         5672,
         '/',
         credentials))
-bcast_channel = connection.channel()
+bcast_channel = bcast_connection.channel()
 
 # Database Service creation:
 
@@ -38,17 +41,19 @@ packages.append(pckg)
 running = True
 
 # Starting package bridges:
-
+bridge_process = Popen(["./bridge.py", "demo"])
 
 print ' [*] Waiting for messages. To exit press CTRL+C'
 
 def package_callback(ch, method, properties, body):
     print " [x] Received %r" % (body,)
 
-
 def web_callback(ch, method, properties, body):
     print " [x] Received %r" % (body,)
-
+    if(body == 'kill'):
+        callback_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = 'kill')
+        callback_channel.stop_consuming()
+	event_queue.put_nowait('kill')
 
 callback_channel.basic_consume(package_callback,
                       queue='logic.package',
@@ -65,10 +70,25 @@ event_handler.start()
 print "Starting main event loop..."
 
 while running:
-    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":"04"}'
-    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":"50"}'
-    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":"51"}'
-    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":"52"}'
-    time.Sleep(5)
+    time.sleep(3)
 
-    
+    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":04}')
+    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":50}')
+    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":51}')
+    bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":52}')
+
+    if (not(event_queue.empty())):
+	running = False
+
+print "Main loop finished... About to close"
+
+print "Waiting for thread to finish"
+while (event_handler.is_alive()):
+    print 'waiting..'
+    time.sleep(.5)
+
+callback_channel.close()
+bcast_channel.close()
+callback_connection.close()
+bcast_connection.close()
+
