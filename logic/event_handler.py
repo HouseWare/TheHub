@@ -1,15 +1,22 @@
+#HouseWare
+
+#Event loop
+#Regularly queries the module, updates the database, and checks the queues
+
 #!/usr/bin/env python
 
+# Libraries
 import pika
 from package import Package
 import time
 import threading
 from subprocess import Popen
-import Queue
+import queue
 import logging
 
-event_queue = Queue.Queue()
+inbox = queue.Queue()
 
+'''
 # RabbitMQ conenction info:
 credentials = pika.PlainCredentials('hub', 'HubWub!')
 callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
@@ -25,6 +32,7 @@ bcast_connection = pika.BlockingConnection(pika.ConnectionParameters(
         '/',
         credentials))
 bcast_channel = bcast_connection.channel()
+'''
 
 # Database Service creation:
 
@@ -63,14 +71,17 @@ callback_channel.basic_consume(web_callback,
                       queue='logic.web',
                       no_ack=True)
 
+'''
 print "Starting Rabbit Response thread..."
 event_handler = threading.Thread(target = callback_channel.start_consuming)
 event_handler.start()
+'''
 
-print "Starting main event loop..."
+print "Initializing main event loop..."
 
-while running:
-    time.sleep(3)
+while True:
+    time.sleep(1)
+    print("Hello, World!")
 
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":04}')
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":50}')
@@ -80,7 +91,7 @@ while running:
     if (not(event_queue.empty())):
 	running = False
 
-print "Main loop finished... About to close"
+print "Terminating main event loop..."
 
 print "Waiting for thread to finish"
 while (event_handler.is_alive()):
