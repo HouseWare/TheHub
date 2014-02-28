@@ -21,6 +21,7 @@ class bridge:
 		stopped = True
 		test = False
 
+		#possibly do something with these
 		def serialport(self): return self._serialport
 		def serialport(self, value):self._serialport = value
 
@@ -30,18 +31,21 @@ class bridge:
 		def __init__(self):
 			pass
 
+		#stop send the kill message to the thread
 		def stop(self):
 			to_hw.write("kill")
 
 
 		def start(self):
 			print("starting")
+			#check that required information is set
 			if ((self.from_hw != None) and (self.serialport != None) and (self.serialrate != None) and self.stopped):
-				if (self.test):
+				if (self.test):#testing
 						mythread = threading.Thread(target=self.theprocess)
 						print("starting process")
 						mythread.start()
 				else:
+						#setup serial and start thread
 						self.myserial = serial.Serial(self.serialport, self.serialrate, timeout=1)
 						if (self.myserial.isOpen()):
 								mythread = threading.Thread(target=self.theprocess)
@@ -55,6 +59,8 @@ class bridge:
 				self.running = True
 				while self.running:
 					#print ("running=" + str(self.running))
+					
+					#message for hardware
 					if (not(self.to_hw.empty())):
 						msg = str(self.to_hw.get_nowait())
 						if (msg == 'kill'):
@@ -63,12 +69,12 @@ class bridge:
 							if (not(self.test)):
 								self.myserial.write(msg)
 							print (" [*] Wrote message to hardware: " + msg)
-					if (not(self.test)):
+					if (not(self.test)):#not a test
 						hw_msg = str(self.myserial.readline())
-						if (hw_msg != ""):
+						if (hw_msg != ""):#got a message from the hardward
 								self.from_hw.put_nowait(hw_msg)
 								print (" [x] Got message from hardware: " + hw_msg)
 
-				if (not(self.test)):		
+				if (not(self.test)):#not a test, clean up
 						self.myserial.close()
 				self.stopped = True
