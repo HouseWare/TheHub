@@ -1,112 +1,80 @@
 #!/usr/bin/env python
 
 import sys
-import pika
+import time
 import serial
-import Queue
+import queue
 import threading
 
-# get the name of the package from program arguments
-package_name = str(sys.argv[1])
 
-# how we know whether we're done (hint, we're not done yet)
 running = True
 
-# thread-safe queues to hold messages
-to_hw = Queue.Queue()
-from_hw = Queue.Queue()
 
-# credentials for access to the RabbitMQ server
-credentials = pika.PlainCredentials('hub', 'HubWub!')
+class bridge:
 
-# the connection to use for asynchronous callbacks
-callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
+		to_hw = queue.Queue()
+		from_hw = None
+		running = True
+		serialport = '/dev/ttyUSB0'
+		serialrate = 9600
+		myserial = None
+		stopped = True
+		test = False
 
-# the connection we'll use to publish messages on
-publish_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
+		#possibly do something with these
+		def serialport(self): return self._serialport
+		def serialport(self, value):self._serialport = value
 
-# setup both our callback channel and our publishing channel using connections
-callback_channel = callback_connection.channel()
-publish_channel = publish_connection.channel()
+		def from_hw(self): return self._from_hw
+		def from_hw(self, value):self._from_hw = value
 
-def broadcast_callback(ch, method, properties, body):
-    # if we get a kill message then stop consuming on the channel
-    if (str(body) == 'kill'):
-        callback_channel.stop_consuming()
-   
-    # place the message into the 'To Hardware' queue 
-    to_hw.put_nowait(body)
+		def __init__(self):
+			pass
 
-def package_callback(ch, method, properties, body):
-    # if we get a kill message then stop consuming on the channel
-    if (str(body) == 'kill'):
-        callback_channel.stop_consuming()
-   
-    # place the message into the 'To Hardware' queue 
-    to_hw.put_nowait(body)
+		#stop send the kill message to the thread
+		def stop(self):
+			to_hw.write("kill")
 
-# assign broadcast_callback to consumer for package.bcast
-callback_channel.basic_consume(broadcast_callback,
-                      queue='package.bcast',
-                      no_ack=True)
 
-# assign package_callback to consumer for package.<insert name here>
-callback_channel.basic_consume(package_callback,
-                      queue='package.' + package_name,
-                      no_ack=True)
+		def start(self):
+			print("starting")
+			#check that required information is set
+			if ((self.from_hw != None) and (self.serialport != None) and (self.serialrate != None) and self.stopped):
+				if (self.test):#testing
+						mythread = threading.Thread(target=self.theprocess)
+						print("starting process")
+						mythread.start()
+				else:
+						#setup serial and start thread
+						self.myserial = serial.Serial(self.serialport, self.serialrate, timeout=1)
+						if (self.myserial.isOpen()):
+								mythread = threading.Thread(target=self.theprocess)
+								mythread.start()
+			else:
+				#kick and scream
+				print("kicking and screaming")
+					
+		def theprocess(self):
+				self.stopped = False
+				self.running = True
+				while self.running:
+					#print ("running=" + str(self.running))
+					
+					#message for hardware
+					if (not(self.to_hw.empty())):
+						msg = str(self.to_hw.get_nowait())
+						if (msg == 'kill'):
+							self.running = False
+						else:
+							if (not(self.test)):
+								self.myserial.write(msg)
+							print (" [*] Wrote message to hardware: " + msg)
+					if (not(self.test)):#not a test
+						hw_msg = str(self.myserial.readline())
+						if (hw_msg != ""):#got a message from the hardward
+								self.from_hw.put_nowait(hw_msg)
+								print (" [x] Got message from hardware: " + hw_msg)
 
-# create a new thread object to start consuming on the callback channel
-rabbit = threading.Thread(target=callback_channel.start_consuming)
-
-# start the thread
-rabbit.start()
-
-# establish serial connection with hardware. reads timeout in 1 second
-package = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
-
-# main loop
-while running:
-
-    if (not(to_hw.empty())):
-        
-        # pull a message off the 'To Hardware' queue
-        msg = str(to_hw.get_nowait())
-
-        if (msg == 'kill'):
-            # welp, looks like we're done now
-            running = False
-        else:
-            # send the message off to the hardware over serial            
-            package.write(msg)
-
-    # read a message from hardware. susceptible to 1 second timeout 
-    hw_msg = str(package.readline())
-
-    if (hw_msg != ""):
-        # place the non-blank message into the 'From Hardware' queue
-        from_hw.put_nowait(hw_msg)
-
-    if (not(from_hw.empty())):
-
-        # cast the message as a string, publish it to the 'From Hardware' queue 
-        message =  str(from_hw.get_nowait())
-        publish_channel.basic_publish(exchange='hub',
-            routing_key='logic.package.' + package_name,
-            body=message)
-
-# shut down all the connections and get outta dodge
-package.close()
-publish_channel.close()
-callback_connection.close()
-publish_connection.close()
-
-# delete the thread object, just in case
-del rabbit
+				if (not(self.test)):#not a test, clean up
+						self.myserial.close()
+				self.stopped = True
