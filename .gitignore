@@ -40,3 +40,6 @@ node_modules
 
 #bower things
 bower_components
+
+#emacs garbage
+*~
