@@ -1,0 +1,14 @@
+{
+    "name": "thehub"
+  , "description": "Node.js dependencies for TheHub."
+  , "version": "1.0.0"
+  , "private": true
+  , "author": "Reilly Tucker Siemens <reilly.siemens@gmail.com>"
+  , "engines": {
+        "node": "0.10.x"
+      , "npm":  "1.2.x"
+    }
+  , "dependencies": {
+      "bower": "latest"
+  }
+}
