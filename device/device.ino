@@ -24,7 +24,7 @@ void setup() {
   Serial.begin(9600);    // Local Serial Communications
   mySerial.begin(9600);  // XBee Communications
 
-  strcpy(out, "Init HouseWare Hub");
+  strcpy(out, "I001");   // Startup Message
   sendMsg();
 
   pinMode(4, INPUT);    // door pin
@@ -33,24 +33,44 @@ void setup() {
 
 /* Read a message from the XBee interface */
 /* Specify a char array as well as the array size */
-int getMsg(char* m, int bsize){
-  if (mySerial.available()) {                          // XBee has data
-    int p = 0;                                         // buffer pos
-    while(mySerial.available()){                       // Until buffer is empty
-      if(mySerial.read() == '{'){                      // Start of JSON data
-        while(mySerial.peek() != '}' && p < bsize){    // until the end of JSON data
-          m[p++]=mySerial.read();                      // build the 'm' buffer
-        }
-        m[p++]=0;                                      // null terminate the 'm' buffer
+void getMsg(){
+  while(mySerial.available()){                       // Until buffer is empty
+   char e = mySerial.read();                         //get a char
+
+   if(e == 'D'){
+      if(mySerial.available()){
+        int pin = mySerial.read() - '0';
+        DigitalRead(pin);
       }
     }
-    return 1;    // got a vailid message
+    if(e == 'A'){
+      if(mySerial.available()){
+        int pin = mySerial.read() - '0';
+        AnalogRead(pin);
+      }
+    }
+    
+    else{
+      // Bad msg
+    }
   }
-  return 0;      // no valid message
+}
+
+/*Digital Read*/
+
+void DigitalRead(int pin){
+  sprintf(out, "VD%i00%d", pin, digitalRead(pin));
+  sendMsg();
+}
+
+void AnalogRead(int pin){
+  sprintf(out, "VD%i%03d", pin, analogRead(pin));
+  sendMsg();
 }
 
 /* Process a givin JSON message */
 /* Specify the char array */
+/*
 int processMsg(char* m){
   switch(m[1]){
     case 'r':            // request
@@ -117,19 +137,20 @@ int processMsg(char* m){
     return -1;
   }
 }
+*/
 
 void loop() {
   // check the door
+  /*
   if(digitalRead(4) != pDoor){
     processMsg("\"req\":04");
     pDoor = !pDoor;
   }
+  */
   
   // get and process messages
-  if(getMsg(str, 20)){
-    processMsg(str);
-  }
-
+  getMsg();
+  
   delay(DELAY);
 }
 
