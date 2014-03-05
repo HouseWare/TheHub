@@ -1,12 +1,10 @@
 {
   "name": "thehub",
-  "version": "0.0.0",
-  "homepage": "n/a",
+  "version": "1.0.0",
   "authors": [
     "Reilly Tucker Siemens <reilly.siemens@gmail.com>"
   ],
-  "description": "Front-end packages for TheHub.",
-  "license": "Custom",
+  "description": "Front-end dependencies for TheHub.",
   "private": true,
   "ignore": [
     "**/.*",
