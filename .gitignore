@@ -43,3 +43,6 @@ bower_components
 
 #emacs garbage
 *~
+
+# Bower
+/web/bower_components/*
