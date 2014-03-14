@@ -5,7 +5,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('mysql+pymysql://thehub:cas0iWur@thehub:3306/hubdb')
+engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb')
 Base = declarative_base()
 
 class Code(Base):
