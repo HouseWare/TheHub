@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  {% include 'header.html' %}
+  <body>
+    <div class="fixed contain-to-grid">
+      <nav class="top-bar" data-topbar>
+	<ul class="title-area">
+	  <li class="name">
+	    <i class="foundicon-home"></i>
+	  </li>
+	  <li class="toggle-topbar menu-icon"><a href="#">Menu</a></li>
+	</ul>
+
+	<section class="top-bar-section">
+	  <!-- Right Nav Section -->
+	  <ul class="right">
+	    <li class="has-dropdown">
+              <a href="#">Some things</a>
+              <ul class="dropdown">
+		<li><a href="#">A thing</a></li>
+              </ul>
+	    </li>
+	  </ul>
+
+	  <!-- Left Nav Section -->
+	  <ul class="left">
+	    <li><a href="#">Left Nav Button</a></li>
+	  </ul>
+	</section>
+      </nav>
+    </div>
+
+    {% if error is defined %}
+    <div class="row">
+      <div class="large-12 columns">
+	<span class="error"><h3>{{error}}</h3></span>
+      </div>
+    </div>
+    {% else %}
+    <div class="row">
+      <h1>Welcome to The Hub!</h1><br>
+      <i class="foundicon-tools">tools</i>
+    </div>
+    {% endif %}
+
+    {% include 'footer.html' %}
+  </body>
+</html>
