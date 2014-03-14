@@ -19,6 +19,10 @@ def resources(resource):
 def resources(resource):
     return static_file(resource, root='bower_components/foundation-icons')
 
+@get('/resr/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
+def resources(resource):
+    return static_file(resource, root='lib/resr')
+
 @get('/login')
 def login():
     return '''
