@@ -1,11 +1,14 @@
-#HouseWare
+#!/usr/bin/env python3
 
-#Event loop
-#Regularly queries the module, updates the database, and checks the queues
+# HouseWare
+# Jeffrey Kuan
+# 3/14/14
 
-#!/usr/bin/env python
+# Event handler class
+# A logic unit that communicates with add-ons and other units of the hub including the web server and database by processing messages as necessary
+# Parameters: a queue of messages and an array of add-ons
 
-# Libraries
+# Packages/modules
 import pika
 from package import Package
 import time
@@ -14,25 +17,7 @@ from subprocess import Popen
 import queue
 import logging
 
-inbox = queue.Queue()
-
-'''
-# RabbitMQ conenction info:
-credentials = pika.PlainCredentials('hub', 'HubWub!')
-callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
-callback_channel = callback_connection.channel()
-
-bcast_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
-bcast_channel = bcast_connection.channel()
-'''
+# inbox = queue.Queue()
 
 # Database Service creation:
 
@@ -71,17 +56,12 @@ callback_channel.basic_consume(web_callback,
                       queue='logic.web',
                       no_ack=True)
 
-'''
 print "Starting Rabbit Response thread..."
 event_handler = threading.Thread(target = callback_channel.start_consuming)
 event_handler.start()
-'''
-
-print "Initializing main event loop..."
 
 while True:
     time.sleep(1)
-    print("Hello, World!")
 
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":04}')
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":50}')
@@ -102,4 +82,3 @@ callback_channel.close()
 bcast_channel.close()
 callback_connection.close()
 bcast_connection.close()
-
