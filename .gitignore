@@ -41,8 +41,5 @@ node_modules
 #bower things
 bower_components
 
-#emacs garbage
-*~
-
 # Bower
 /web/bower_components/*
