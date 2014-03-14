@@ -1,6 +1,6 @@
 from bottle import route, get, post, request, run, static_file
 from jinja2 import Template, Environment, FileSystemLoader
-import db
+import db # Will only work with database/db.py symlinked into web/
 
 env = Environment(loader=FileSystemLoader('lib/templates'))
 
@@ -43,6 +43,12 @@ def get_devices():
     devicesQuery = db.session.query(db.Device)
     devicesAsJson = list(map(lambda device: device.to_dictionary(), devicesQuery))
     return { 'devices' : devicesAsJson }
+
+@get('/api/sensors/<device_id>')
+def get_sensors(device_id):
+    sensorsQuery = db.session.query(db.Device).filter(db.Device.id == device_id)
+    sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
+    return { 'sensors' : sensorsAsJson }
 
 @post('/login')
 def do_login():
