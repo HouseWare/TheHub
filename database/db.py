@@ -5,7 +5,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('mysql+pymysql://thehub:cas0iWur@thehub:3306/hubdb')
+engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb')
 Base = declarative_base()
 
 class Code(Base):
@@ -37,9 +37,7 @@ class Device(Base):
         Returns a dictionary indexed by device table fields.
         """
         return { 'id' : self.id,
-                 'serial_port' : self.serial_port,
-                 'description' : self.description,
-                 'type' : self.type }
+                 'description' : self.description }
 
 class DeviceModel(Base):
     __tablename__ = 'device_models'
@@ -77,9 +75,7 @@ class Sensor(Base):
         Returns a dictionary indexed by sensor table fields.
         """
         return { 'id' : self.id,
-                 'device' : self.device.id,
-                 'description' : self.description,
-                 'type' : self.type }
+                 'description' : self.description }
 
 class SensorModel(Base):
     __tablename__ = 'sensor_models'
@@ -118,10 +114,7 @@ class DataEvent(Base):
         """
         Returns a dictionary indexed by event table fields.
         """
-        return { 'id' : self.id,
-                 'timestamp' : self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
-                 'device' : self.device.id,
-                 'sensor' : self.sensor.id,
+        return { 'timestamp' : self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                  'value' : self.value }
 
 class CodeEvent(Base):
