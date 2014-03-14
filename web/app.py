@@ -1,5 +1,7 @@
 from bottle import route, get, post, request, run, static_file
 from jinja2 import Template, Environment, FileSystemLoader
+import db
+
 env = Environment(loader=FileSystemLoader('lib/templates'))
 
 @get('/')
@@ -35,6 +37,12 @@ Password: <input name="password" type="password" placeholder="password" />
 </form>
 </div>
 '''
+
+@get('/api/devices')
+def get_devices():
+    devicesQuery = db.session.query(db.Device)
+    devicesAsJson = list(map(lambda device: device.to_dictionary(), devicesQuery))
+    return { 'devices' : devicesAsJson }
 
 @post('/login')
 def do_login():
