@@ -4,18 +4,23 @@
 # Jeffrey Kuan
 # 3/14/14
 
-# Event handler class
-# A logic unit that communicates with add-ons and other units of the hub including the web server and database by processing messages as necessary
-# Parameters: a queue of messages and an array of add-ons
-
 # Packages/modules
-import pika
 from package import Package
 import time
 import threading
-from subprocess import Popen
 import queue
-import logging
+import bridge
+
+class Event_Handler:
+# Event handler class
+# A logic unit that communicates with devices and other units of the hub including the web server and database by processing messages as necessary
+
+def __init__(self, queue, devices[])
+
+# Class constructor
+# Parameters: a queue of messages and an array of devices
+
+# 
 
 # inbox = queue.Queue()
 
@@ -61,7 +66,7 @@ event_handler = threading.Thread(target = callback_channel.start_consuming)
 event_handler.start()
 
 while True:
-    time.sleep(1)
+    time.sleep(.5)
 
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":04}')
     bcast_channel.basic_publish(exchange = 'hub', routing_key = 'package.bcast', body = '{"req":50}')
@@ -71,6 +76,7 @@ while True:
     if (not(event_queue.empty())):
 	running = False
 
+# Termination sequence
 print "Terminating main event loop..."
 
 print "Waiting for thread to finish"
