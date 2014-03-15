@@ -6,7 +6,7 @@
 
 # Packages/modules
 from package import Package
-from sqlalchemy import *
+##from sqlalchemy import *
 import time
 import threading
 import queue
@@ -14,7 +14,7 @@ import bridge
 
 # Event handler class
 # A logic unit that communicates with devices and other units of the hub including the web server and database by processing messages as necessary
-class Event_Handler:
+class Event_Handler(inbox, devices):
 	running = 1;
 
 # Class constructor
@@ -30,7 +30,7 @@ def run(self)
 	while running:
 		# Time delay
 		start = time.clock()
-		# Call refresh device method
+		##Call refresh device method
 		
 		# Queue check
 		while (time.clock() < (start + 60)):
@@ -51,10 +51,10 @@ def __pop(self)
 		message = inbox.get()
 		# Data update received
 		if :
-			# Write to database
+			##Write to database
 		# Refresh request received
 		elif :
-			# Call refresh device method
+			##Call refresh device method
 		# Termination signal received
 		else:
 			running = 0
@@ -63,3 +63,4 @@ def __pop(self)
 # Parameter(s): n/a
 def __del__(self):
 	# Send confirmation message to main control queue
+	pass
