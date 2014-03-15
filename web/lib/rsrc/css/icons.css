@@ -1,6 +1,11 @@
 .foundicon-home {
-    color:white;
+    color:green;
     vertical-align:middle;
     horizontal-align:middle;
     font-size:20pt;
+    margin-right:20px;
+}
+
+.foundicon-home:hover {
+    text-shadow: 0 0 5px #00aa5b;
 }
