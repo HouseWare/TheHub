@@ -1,12 +1,15 @@
-.foundicon-home {
+.top-bar-section
+li:not(.has-form) a:not(.button):hover {
+    background-color:#333333;
+}
+
+.topbar-icon {
     color:green;
-    vertical-align:middle;
-    horizontal-align:middle;
-    font-size:20pt;
+    font-size:25pt;
     margin-right:20px;
     margin-left:12px;
 }
 
-.foundicon-home:hover {
+.topbar-icon:hover {
     text-shadow: 0 0 5px #00aa5b;
 }

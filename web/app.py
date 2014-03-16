@@ -8,8 +8,10 @@ env = Environment(loader=FileSystemLoader('lib/templates'))
 @get('/')
 @get('/:page_title')
 def index(page_title = 'Main'):
-    if page_title in ['Main', 'Home']:
+    if page_title.lower() in ['main', 'home']:
         return env.get_template('main.html').render(page_title=page_title)
+    elif page_title.lower() in ['about', 'about_us']:
+        return env.get_template('about.html').render(page_title='About Us')
     else:
         return env.get_template('main.html').render(page_title='Main', error='No page {0}'.format(page_title))
 
@@ -20,7 +22,7 @@ def resources(resource):
 
 @get('/foundation-icons/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
-    return static_file(resource, root='bower_components/foundation-icons')
+    return static_file(resource, root='bower_components/foundation-icon-fonts')
 
 @get('/rsrc/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
