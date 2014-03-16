@@ -1,16 +1,19 @@
+{% block header %}
 <head>
 
-  <title>The Hub</title>
+  <title>{% block title %}{% endblock %}</title>
 
   <link rel="stylesheet" type="text/css" href="/foundation/css/foundation.min.css">
   <link rel="stylesheet" type="text/css" href="/foundation/css/normalize.css">
   <link rel="stylesheet" type="text/css" href="/rsrc/css/main.css">
   <link rel="stylesheet" type="text/css" href="/rsrc/css/icons.css">
   <link rel="stylesheet" type="text/css" href="/foundation-icons/foundation_icons_general/stylesheets/general_foundicons.css">
+  {% block stylesheets %}{% endblock %}
 
   <script src="/foundation/js/vendor/jquery.js"></script>
   <script src="/foundation/js/foundation.min.js"></script>
   <script src="/foundation/js/vendor/fastclick.js"></script>
   <script src="/foundation/js/vendor/modernizr.js"></script>
-    
+    {% block scripts %}{% endblock %}
 </head>
+{% endblock %}

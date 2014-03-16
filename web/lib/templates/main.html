@@ -1,22 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-  {% include 'header.html' %}
-  <body>
-    {% include 'navbar.html' %}
+{% extends "base.html" %}
+{% block title%}The Hub{% endblock %}
 
-    {% if error is defined %}
-    <div class="row">
-      <div class="large-12 columns">
-	<span class="error"><h3>{{error}}</h3></span>
-      </div>
-    </div>
-    {% else %}
-    <div class="row">
-      <h1>Welcome to The Hub!</h1><br>
-      <i class="foundicon-tools">tools</i>
-    </div>
-    {% endif %}
+{% block content %}
+<div class="row">
+  <div class="large-12 columns">
+    <h3>Welcome to The Hub!</h3>
+  </div>
+</div>
+{% endblock %}
 
-    {% include 'footer.html' %}
-  </body>
-</html>
+{% block footer %}
+&copy - HouseWare LLC 2014
+{% endblock %}
