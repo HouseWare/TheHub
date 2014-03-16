@@ -1,3 +1,10 @@
 body {
 
 }
+
+.top-bar-section .has-dropdown > a {
+    padding:0;
+}
+.top-bar-section .has-dropdown > a:after {
+    border-color: transparent transparent transparent;
+}
