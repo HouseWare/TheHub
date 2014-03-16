@@ -38,17 +38,21 @@ Password: <input name="password" type="password" placeholder="password" />
 </div>
 '''
 
-@get('/api/devices')
+@get('/api/device/getdevices')
 def get_devices():
     devicesQuery = db.session.query(db.Device)
     devicesAsJson = list(map(lambda device: device.to_dictionary(), devicesQuery))
     return { 'devices' : devicesAsJson }
 
-@get('/api/sensors/<device_id>')
+@get('/api/device/<device_id>/getsensors')
 def get_sensors(device_id):
     sensorsQuery = db.session.query(db.Device).filter(db.Device.id == device_id)
     sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
     return { 'sensors' : sensorsAsJson }
+
+@get('/api/sensors/<sensor_id>/getevents')
+def get_sensor_events(sensor_id):
+    return { 'sensor_id' : sensor_id }
 
 @post('/login')
 def do_login():
