@@ -1,5 +1,6 @@
 from bottle import route, get, post, request, run, static_file
 from jinja2 import Template, Environment, FileSystemLoader
+from sqlalchemy import or_, and_
 from ..database import db 
 
 env = Environment(loader=FileSystemLoader('lib/templates'))
@@ -50,9 +51,11 @@ def get_sensors(device_id):
     sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
     return { 'sensors' : sensorsAsJson }
 
-@get('/api/sensors/<sensor_id>/getevents')
-def get_sensor_events(sensor_id):
-    return { 'sensor_id' : sensor_id }
+@get('/api/sensors/<sensor_id>/getevents/<timestamp>')
+def get_sensor_events(sensor_id, timestamp):
+    data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
+    data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))
+    return { 'data_events' : data_events_json }
 
 @post('/login')
 def do_login():
