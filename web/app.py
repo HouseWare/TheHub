@@ -1,6 +1,6 @@
 from bottle import route, get, post, request, run, static_file
 from jinja2 import Template, Environment, FileSystemLoader
-import db # Will only work with database/db.py symlinked into web/
+from ..database import db 
 
 env = Environment(loader=FileSystemLoader('lib/templates'))
 
