@@ -38,7 +38,7 @@ function get_sensors(device_id) {
     $.get('/api/device/' + device_id + '/getsensors', function(data) {
 	data['sensors'].forEach(function(sensor) {
 	    tabs.append('<dd ' + (first ? active : '>') + '<a href="#sen' + sensor['id'] + '">' + sensor['description'] + '</a></dd>');
-	    tab_contents.append('<div class="content ' + (first ? 'active"' : '"') + 'id="sen' + sensor['id'] + '">build graph - put here</div>');
+	    tab_contents.append('<div class="content ' + (first ? 'active"' : '"') + 'id="sen' + sensor['id'] + '">' + sensor['description'] + ' - graph here</div>');
 	    first = false;
 	});
     });
