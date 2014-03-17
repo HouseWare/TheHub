@@ -1,0 +1,15 @@
+body {
+
+}
+
+div.fixed.contain-to-grid,
+.top-bar-section li > a {
+    max-height:45px;
+}
+
+.top-bar-section .has-dropdown > a {
+    padding:0;
+}
+.top-bar-section .has-dropdown > a:after {
+    border-color: transparent transparent transparent;
+}

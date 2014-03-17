@@ -3,28 +3,30 @@ from jinja2 import Template, Environment, FileSystemLoader
 from sqlalchemy import or_, and_
 from ..database import db 
 
-env = Environment(loader=FileSystemLoader('lib/templates'))
+env = Environment(loader=FileSystemLoader('TheHub/web/lib/templates'))
 
 @get('/')
 @get('/:page_title')
 def index(page_title = 'Main'):
-    if page_title in ['Main', 'Home']:
+    if page_title.lower() in ['main', 'home']:
         return env.get_template('main.html').render(page_title=page_title)
+    elif page_title.lower() in ['about', 'about_us']:
+        return env.get_template('about.html').render(page_title='About Us')
     else:
         return env.get_template('main.html').render(page_title='Main', error='No page {0}'.format(page_title))
 
 
 @get('/foundation/<resource:re:.*(\.js|\.css)>')
 def resources(resource):
-    return static_file(resource, root='bower_components/foundation')
+    return static_file(resource, root='TheHub/web/bower_components/foundation')
 
 @get('/foundation-icons/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
-    return static_file(resource, root='bower_components/foundation-icons')
+    return static_file(resource, root='TheHub/web/bower_components/foundation-icon-fonts')
 
-@get('/resr/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
+@get('/rsrc/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
-    return static_file(resource, root='lib/resr')
+    return static_file(resource, root='TheHub/web/lib/rsrc')
 
 @get('/login')
 def login():
@@ -51,7 +53,7 @@ def get_sensors(device_id):
     sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
     return { 'sensors' : sensorsAsJson }
 
-@get('/api/sensors/<sensor_id>/getevents/<timestamp>')
+@get('/api/sensor/<sensor_id>/getevents/<timestamp>')
 def get_sensor_events(sensor_id, timestamp):
     data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
     data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))

@@ -1,0 +1,15 @@
+.top-bar-section
+li:not(.has-form) a:not(.button):hover {
+    background-color:#333333;
+}
+
+.topbar-icon {
+    color:green;
+    font-size:25pt;
+    margin-right:20px;
+    margin-left:12px;
+}
+
+.topbar-icon:hover {
+    text-shadow: 0 0 3px #00aa5b;
+}

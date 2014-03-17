@@ -14,7 +14,7 @@
     "tests"
   ],
   "dependencies": {
-    "foundation-icons": "*",
-    "foundation": "~5.1.1"
+    "foundation": "~5.1.1",
+    "foundation-icon-fonts": "*"
   }
 }
