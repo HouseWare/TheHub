@@ -53,7 +53,7 @@ def get_sensors(device_id):
     sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
     return { 'sensors' : sensorsAsJson }
 
-@get('/api/sensors/<sensor_id>/getevents/<timestamp>')
+@get('/api/sensor/<sensor_id>/getevents/<timestamp>')
 def get_sensor_events(sensor_id, timestamp):
     data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
     data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))
