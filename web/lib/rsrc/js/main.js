@@ -37,9 +37,26 @@ function get_sensors(device_id) {
 
     $.get('/api/device/' + device_id + '/getsensors', function(data) {
 	data['sensors'].forEach(function(sensor) {
+	    var sensor_data = get_sensor_data(sensor['id']);
+
 	    tabs.append('<dd ' + (first ? active : '>') + '<a href="#sen' + sensor['id'] + '">' + sensor['description'] + '</a></dd>');
-	    tab_contents.append('<div class="content ' + (first ? 'active"' : '"') + 'id="sen' + sensor['id'] + '">' + sensor['description'] + ' - graph here</div>');
+	    tab_contents.append('<div class="content ' + (first ? 'active"' : '"') + 'id="sen' + sensor['id'] + '">' + sensor_data + '</div>');
 	    first = false;
 	});
     });
+};
+
+function get_sensor_data(sensor_id) {
+    var output = '<div class="sensor-data"><table class="event-table"><tr><th>Date</th><th>Value</th></tr>';
+    $.ajax({
+	url:'/api/sensor/' + sensor_id + '/getevents/2014-01-01+00:00:00',
+	type: 'GET',
+	async: false,
+	success: function(data) {
+	    data['data_events'].forEach(function(data_event) {
+		output += '<tr><td>' + data_event['timestamp'] + '</td><td>' + data_event['value'] + '</td></tr>';
+	    });
+	}});
+    output += '</table></div>';
+    return output;
 };

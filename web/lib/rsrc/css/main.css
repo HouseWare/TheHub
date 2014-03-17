@@ -13,3 +13,11 @@ div.fixed.contain-to-grid,
 .top-bar-section .has-dropdown > a:after {
     border-color: transparent transparent transparent;
 }
+
+table.event-table {
+    width:90%;
+}
+table.event-table td {
+    width:50%;
+    text-align:center;
+}
