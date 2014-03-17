@@ -11,5 +11,5 @@ li:not(.has-form) a:not(.button):hover {
 }
 
 .topbar-icon:hover {
-    text-shadow: 0 0 5px #00aa5b;
+    text-shadow: 0 0 3px #00aa5b;
 }

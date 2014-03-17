@@ -3,7 +3,7 @@ from jinja2 import Template, Environment, FileSystemLoader
 from sqlalchemy import or_, and_
 from ..database import db 
 
-env = Environment(loader=FileSystemLoader('lib/templates'))
+env = Environment(loader=FileSystemLoader('TheHub/web/lib/templates'))
 
 @get('/')
 @get('/:page_title')
@@ -18,15 +18,15 @@ def index(page_title = 'Main'):
 
 @get('/foundation/<resource:re:.*(\.js|\.css)>')
 def resources(resource):
-    return static_file(resource, root='bower_components/foundation')
+    return static_file(resource, root='TheHub/web/bower_components/foundation')
 
 @get('/foundation-icons/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
-    return static_file(resource, root='bower_components/foundation-icon-fonts')
+    return static_file(resource, root='TheHub/web/bower_components/foundation-icon-fonts')
 
 @get('/rsrc/<resource:re:.*(\.js|\.css|\.woff|\.ttf|\.svg)>')
 def resources(resource):
-    return static_file(resource, root='lib/rsrc')
+    return static_file(resource, root='TheHub/web/lib/rsrc')
 
 @get('/login')
 def login():
