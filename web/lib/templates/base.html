@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-  {% include 'header.html' %}
+  <head>
+
+    <title>{{page_title}}</title>
+
+    <link rel="stylesheet" type="text/css" href="/foundation/css/foundation.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/foundation/css/normalize.css"/>
+    <link rel="stylesheet" type="text/css" href="/rsrc/css/main.css"/>
+    <link rel="stylesheet" type="text/css" href="/rsrc/css/icons.css"/>
+    <link rel="stylesheet" type="text/css" href="/foundation-icons/foundation-icons.css"/>
+    {% block stylesheets %}{% endblock %}
+
+    <script src="/foundation/js/vendor/jquery.js"></script>
+    <script src="/foundation/js/foundation.min.js"></script>
+    <script src="/foundation/js/vendor/fastclick.js"></script>
+    <script src="/foundation/js/vendor/modernizr.js"></script>
+    {% block scripts %}{% endblock %}
+  </head>
   <body>
     {% include 'navbar.html' %}
 
@@ -12,10 +28,10 @@
     </div>
     {% else %}
     <div class="content">
-    {% block content %}{% endblock %}
-    <div>
-    {% endif %}
+      {% block content %}{% endblock %}
+      <div>
+	{% endif %}
 
-    {% include 'footer.html' %}
+	{% include 'footer.html' %}
   </body>
 </html>
