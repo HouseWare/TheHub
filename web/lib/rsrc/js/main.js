@@ -7,8 +7,10 @@ $(document).ready(function() {
     $(document).foundation();
 });
 
-$(document).on('click', '.device-btn',  function() {
-    console.log('clicked');
+$(document).on('click', '.device-btn', function(btnClick) {
+    var device_id = btnClick.target.attributes['data-id'].value;
+    get_sensors(device_id);
+    $(document).foundation();
 });
 
 function get_devices() {
