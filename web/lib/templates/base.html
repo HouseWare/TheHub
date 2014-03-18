@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-
+    <meta charset="UTF-8">
+    
     <title>{{page_title}}</title>
 
     <link rel="stylesheet" type="text/css" href="/foundation/css/foundation.min.css"/>
@@ -17,6 +18,7 @@
     <script src="/foundation/js/vendor/modernizr.js"></script>
     {% block scripts %}{% endblock %}
   </head>
+
   <body>
     {% include 'navbar.html' %}
 
@@ -29,9 +31,9 @@
     {% else %}
     <div class="content">
       {% block content %}{% endblock %}
-      <div>
-	{% endif %}
+    </div>
+    {% endif %}
 
-	{% include 'footer.html' %}
+    {% include 'footer.html' %}
   </body>
 </html>
