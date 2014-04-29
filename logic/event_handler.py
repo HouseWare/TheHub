@@ -3,7 +3,7 @@
 """
 HouseWare
 Jeffrey Kuan
-4/22/14
+4/29/14
 """
 
 # Imports
@@ -55,17 +55,20 @@ def __init__(self, inbox, devices)
         else:
             message = inbox.get()
 
-            # Data update received
-            if """""":
+            # Sensor update received
+            if not isinstance(message, str):
                write(message)
 
-            # Refresh request received
-            elif """""":
-                refresh()
+            # Other message received
+            else
 
-            # Termination signal received
-            else:   
-                running = False
+                # Refresh request received
+                if message == 'refresh':
+                    refresh()
+
+                # Termination signal received
+                else:   
+                    running = False
 
     # Request refreshed sensor values
     # Parameter(s): n/a
