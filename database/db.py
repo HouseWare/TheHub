@@ -5,7 +5,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb')
+engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb_test')
 Base = declarative_base()
 
 class Code(Base):
@@ -68,6 +68,7 @@ class Sensor(Base):
         Integer, ForeignKey('sensor_models.model_number'), nullable=False
     )
     model = relationship("SensorModel", foreign_keys=[model_number])
+    pin = Column(String(3), nullable=False)
     serial_number = Column(Integer, nullable=False)
 
     def to_dictionary(self):
