@@ -138,6 +138,22 @@ class CodeEvent(Base):
                  'device' : self.device.id,
                  'code' : self.code.code }
 
+class Notification(Base):
+    __tablename__ = 'notifications'
+    id = Column(Integer, primary_key=True, nullable=False)
+    timestamp = Column(
+            DateTime, default=datetime.datetime.utcnow, nullable=False
+    )
+    read = Column(Boolean(create_constraint=False), nullable=False)
+    value = Column(String(256), nullable=False)
+    severity_id = Column(Integer, ForeignKey('severities.id'), nullable=False)
+    severity = relationship("Severity", foreign_keys=[severity_id])
+
+class Severity(Base):
+    __tablename__ = 'severities'
+    id = Column(Integer, primary_key=True, nullable=False)
+    value = Column(String(256), nullable=False)
+
 Base.metadata.create_all(bind=engine)
 Session = sessionmaker(bind=engine)
 session=Session()
