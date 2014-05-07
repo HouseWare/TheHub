@@ -113,7 +113,7 @@ class DataEvent(Base):
 
     def to_dictionary(self):
         """
-        Returns a dictionary indexed by event table fields.
+        Returns a dictionary indexed by data event fields.
         """
         return { 'timestamp' : self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                  'value' : self.value }
@@ -131,7 +131,7 @@ class CodeEvent(Base):
 
     def to_dictionary(self):
         """
-        Returns a dictionary indexed by code log fields.
+        Returns a dictionary indexed by code event fields.
         """
         return { 'id' : self.id,
                  'timestamp' : self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
@@ -149,10 +149,27 @@ class Notification(Base):
     severity_id = Column(Integer, ForeignKey('severities.id'), nullable=False)
     severity = relationship("Severity", foreign_keys=[severity_id])
 
+    def to_dictionary(self):
+        """
+        Returns a dictionary indexed by notification fields.
+        """
+        return { 'id' : self.id,
+                 'timestamp' : self.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                 'read' : self.read,
+                 'value' : self.value,
+                 'severity' : self.severity.id }
+
 class Severity(Base):
     __tablename__ = 'severities'
     id = Column(Integer, primary_key=True, nullable=False)
     value = Column(String(256), nullable=False)
+
+    def to_dictionary(self):
+        """
+        Returns a dictionary indexed by severity fields.
+        """
+        return { 'id' : self.id,
+                 'value' : self.value }
 
 Base.metadata.create_all(bind=engine)
 Session = sessionmaker(bind=engine)
