@@ -9,15 +9,20 @@ import serial
 import queue
 import threading
 import re
+import ../database/db
 
 
 
 class Bridge():
 
 	
-		def __init__(self, from_hw_queue, device_id=0, sensor_ids=[]):
-			self.device_id = device_id
-			self.sensor_ids = sensor_ids#{"A1".."AZ","D1".."DZ"}, list of sensor IDs as outlined in protocol
+		def __init__(self, from_hw_queue, device):
+
+			self.device = device;
+
+			#self.device_id = device_id
+			#self.sensor_ids = sensor_ids#{"A1".."AZ","D1".."DZ"}, list of sensor IDs as outlined in protocol
+
 			self.from_hw = from_hw_queue
 			
 			self.to_hw = queue.Queue()
@@ -115,11 +120,19 @@ class Bridge():
 				to_hw.to_hw.put_nowait("kill")
 			else:
 				#default behavior get all
-				for sensor in self.sensor_ids:
-					if re.match("[A-Z][A-Z0-9]",sensor):
-						self.to_hw.put_nowait(sensor);
+				for somesensor in device.sensors
+				
+					if re.match("[A-Z][A-Z0-9]",sensor.id):
+						self.to_hw.put_nowait(sensor.id);
 					else:
-						print("Bad sensor ID: "+sensor)
+						print("Bad sensor ID: "+sensor.id)
+				
+				
+#				for sensor in self.sensor_ids:
+#					if re.match("[A-Z][A-Z0-9]",sensor):
+#						self.to_hw.put_nowait(sensor);
+#					else:
+#						print("Bad sensor ID: "+sensor)
 		
 		
 		#place holding for message translation
@@ -131,6 +144,11 @@ class Bridge():
 		def translate_message_fromhw (self,themessage):
 			#do some translating			
 			if themessage[0] == "V":
-				outmessage = [themessage[0],self.device_id,themessage[1:3],int(themessage[3:6])]
+				
+				#get appropriate sensor object
+				thesensor = db.session.query(db.Sensor).filter(db.Sensor.device_id==mydevice.id).filter(db.Sensor.pin=themessage[1:3]).all()[0]
+				
+				#create dataeven object and return
+				outmessage = db.DataEvent(device = self.device, sensor = thesensor, value = int(themessage[3:6]))
 				
 			return outmessage
