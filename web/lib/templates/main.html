@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block scripts %}
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="/rsrc/js/main.js"></script>
 {% endblock %}
 
@@ -19,9 +20,13 @@
     </div>
   </div>
   <div class="large-9 columns">
-    <dl class="tabs sensor-tabs" data-tab>
-    </dl>
-    <div class="tabs-content sensor-tabs-content">
+    <ul class="button-group sensor-btn-group">
+    </ul>
+    <div class="row">
+      <div class="small-12 columns">
+	<div class="sensor-content">
+	</div>
+      </div>
     </div>
   </div>
 </div>

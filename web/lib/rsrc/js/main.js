@@ -28,35 +28,31 @@ function get_devices() {
 };
 
 function get_sensors(device_id) {
-    var tabs = $('.sensor-tabs');
-    tabs.html('');
-    var tab_contents = $('.sensor-tabs-content');
-    tab_contents.html('');
+    var btnsGrp = $('.sensor-btn-group');
+    btnsGrp.html('');
+
     var first = true;
     var active = 'class="active">';
 
     $.get('/api/device/' + device_id + '/getsensors', function(data) {
 	data['sensors'].forEach(function(sensor) {
-	    var sensor_data = get_sensor_data(sensor['id']);
-
-	    tabs.append('<dd ' + (first ? active : '>') + '<a href="#sen' + sensor['id'] + '">' + sensor['description'] + '</a></dd>');
-	    tab_contents.append('<div class="content ' + (first ? 'active"' : '"') + 'id="sen' + sensor['id'] + '">' + sensor_data + '</div>');
+	    btnsGrp.append('<li ' + (first ? active : '>') + '<a class="button button-small" href="#sen' + sensor['id'] + '">' + sensor['description'] + '</a></li>');
 	    first = false;
 	});
     });
 };
 
 function get_sensor_data(sensor_id) {
-    var output = '<div class="sensor-data"><table class="event-table"><tr><th>Date</th><th>Value</th></tr>';
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+    
     $.ajax({
 	url:'/api/sensor/' + sensor_id + '/getevents/2014-01-01+00:00:00',
 	type: 'GET',
 	async: false,
 	success: function(data) {
-	    data['data_events'].forEach(function(data_event) {
-		output += '<tr><td>' + data_event['timestamp'] + '</td><td>' + data_event['value'] + '</td></tr>';
-	    });
+	    output = data['data_events'];
 	}});
-    output += '</table></div>';
-    return output;
 };
