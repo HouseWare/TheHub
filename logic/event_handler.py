@@ -3,7 +3,7 @@
 """
 HouseWare
 Jeffrey Kuan
-5/6/14
+5/13/14
 """
 
 # Imports
@@ -94,21 +94,27 @@ def __init__(self, inbox, devices)
 
             # Door open
             if message.sensor.value == door_open_value
-                ''''''
+                door_notification = db.Notification(read = False, value = "The door is open!", severity = notification)
+                db.session.add_all([door_notification])
+                db.session.commit()
 
         # Temperature logic
         if isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)
 
             # Temperature high
             if message.value > temp_on_value
-                ''''''
+                temp_notification = db.Notification(read = False, value = "The temperature is over 9000!", severity = notification)
+                db.session.add_all([temp_notification)
+                db.session.commit()
 
         # Light logic
         if isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)
 
             # Light high
             if message.value > light_on_value
-                ''''''
+                light_notification = db.Notification(read = False, value = "The light is on!", severity = notification)
+                db.session.add_all([light_notification])
+                db.session.commit()
 
     # Class destructor
     # Parameter(s): n/a
