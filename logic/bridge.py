@@ -13,7 +13,7 @@ import ../database/db
 
 
 
-class Bridge():
+class Bridge(from_hw_queue, device):
 
 	
 		def __init__(self, from_hw_queue, device):
