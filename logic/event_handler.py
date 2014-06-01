@@ -3,7 +3,7 @@
 """
 HouseWare
 Jeffrey Kuan
-5/13/14
+5/27/14
 """
 
 # Imports
@@ -18,15 +18,15 @@ from ..database import db
 class EventHandler(inbox, devices):
     running = True;
 
-door_open_value = 1
-temp_on_value   = 63
-light_on_value  = 511
+    door_open_value = 1
+    temp_on_value   = 63
+    light_on_value  = 511
 
-# Class constructor
-# Parameter(s): a queue for messages and an array of devices
-def __init__(self, inbox, devices)
-    self.inbox = inbox
-    self.devices = devices
+    # Class constructor
+    # Parameter(s): a queue for messages and an array of devices
+    def __init__(self, inbox, devices)
+        self.inbox = inbox
+        self.devices = devices
 
     # Main run method
     # Parameter(s): n/a
