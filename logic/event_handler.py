@@ -110,7 +110,7 @@ class EventHandler:
         if (isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)):
 
             # Temperature high
-            if message.value > temp_high_value
+            if (message.value > temp_high_value):
                 temp_notification = db.Notification(read = False, value = "The temperature is over 9000!", severity = notification)
                 db.session.add_all([temp_notification)
                 db.session.commit()
