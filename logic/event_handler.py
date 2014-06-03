@@ -34,6 +34,7 @@ class EventHandler:
 
         # Main event loop
         while running:
+            print "Running..."
             start = time.clock()    # Starts time delay
             self.refresh()
 
@@ -44,6 +45,7 @@ class EventHandler:
     # Queue push method
     # Parameter(s): a message to be pushed onto the queue
     def push(self, message):
+        print "Message pushed."
         inbox.put(message)
 
     # Queue pop method
@@ -56,6 +58,7 @@ class EventHandler:
 
         # Messages found
         else:
+            print "Message popped."
             message = inbox.get()
 
             # Sensor update received
@@ -70,12 +73,15 @@ class EventHandler:
                     self.refresh()
 
                 # Termination signal received
-                else:   
+                else:
+                    print "Shutting down..."
                     running = False
 
     # Request refreshed sensor values
     # Parameter(s): n/a
     def refresh(self):
+
+        print "Refreshing..."
 
         # Send message to each device
         for x in devices:
@@ -88,6 +94,8 @@ class EventHandler:
         # Pass to database
         db.session.add_all([message])
         db.session.commit()
+
+        print "Database accessed."
 
         # Door logic
         if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
