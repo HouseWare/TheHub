@@ -1,4 +1,4 @@
-from bottle import route, get, post, request, run, static_file
+from bottle import route, get, post, request, response, run, static_file
 from jinja2 import Template, Environment, FileSystemLoader
 from sqlalchemy import or_, and_
 from ..database import db 
@@ -58,6 +58,20 @@ def get_sensor_events(sensor_id, timestamp):
     data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
     data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))
     return { 'data_events' : data_events_json }
+
+@get('/api/notifications')
+def get_notifications():
+    unread_notifications = db.session.query(db.Notification).filter(db.Notification.read == False)
+    json_notifications = list(map(lambda notification: notification.to_dictionary(), unread_notifications))
+    return { 'notifications' : json_notifications }
+
+@post('/api/notifications/<notification_id>/markread')
+def mark_notification(notification_id):
+    notification = db.session.query(db.Notification).filter(db.Notification.id == notification_id).one()
+    notification.read = True
+    db.session.commit()
+    response.status = 200
+    return { 'success' : 'true' }
 
 @post('/login')
 def do_login():
