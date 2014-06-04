@@ -30,12 +30,11 @@ print("Creating threads.")
 # Create event thread object, give it parameters with kwargs.
 
 event_loop = event_handler.EventHandler(event_queue, bridge_devices)
-
+target = event_loop.run()
 event_thread = threading.Thread(
     name = "Event Loop",
     target = event_loop.run,
 )
-
 
 # Add thread objects to the list of threads.
 #threads.extend([web_thread, event_thread])

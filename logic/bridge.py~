@@ -120,7 +120,6 @@ class Bridge():
                 
         def send_message(self, themessage):
             #translated_message = translate_message_tohw(themessage)
-            print ("message from hardware")
             if self.output:
                 print (" [x] Got message to pass to hardware: " + themessage)
             
@@ -138,7 +137,6 @@ class Bridge():
         
         #place holding for message translation
         def translate_message_tohw (themessage):
-            print ("message to hardware")
             #do some translating eventually
             outmessage = themessage
             return outmessage

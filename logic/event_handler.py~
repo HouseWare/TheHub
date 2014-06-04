@@ -46,20 +46,20 @@ class EventHandler:
     # Parameter(s): a message to be pushed onto the queue
     def push(self, message):
         print ("Message pushed.")
-        self.inbox.put(message)
+        inbox.put(message)
 
     # Queue pop method
     # Parameter(s): n/a
     def pop(self):
 
         # No messages
-        if self.inbox.empty():
+        if inbox.empty():
             pass
 
         # Messages found
         else:
             print ("Message popped.")
-            message = self.inbox.get()
+            message = inbox.get()
 
             # Sensor update received
             if not isinstance(message, str):
