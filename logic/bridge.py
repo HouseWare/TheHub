@@ -99,12 +99,12 @@ class Bridge():
                     if (not(self.test)):#not a test
                         hw_msg = self.myserial.readline().decode('utf8')                        
 #                        if (hw_msg != b''):#got a message from the hardward
-                        if self.output:
-                            self.f.write(" [x] Got message from hardware: " + hw_msg + "\n")
-                            print(" [x] Got message from hardware: " + hw_msg + "\n")
+
                         if (hw_msg!=""):#got a message from the hardward
-                                
-                                self.from_hw.put_nowait(self.translate_message_fromhw(hw_msg))
+                            if self.output:
+                                self.f.write(" [x] Got message from hardware: " + hw_msg + "\n")
+                                print(" [x] Got message from hardware: " + hw_msg + "\n")                                
+                            self.from_hw.put_nowait(self.translate_message_fromhw(hw_msg))
                                 
                     else:#is a test
                         if (not( self.fromhwtest.empty())):
@@ -126,7 +126,7 @@ class Bridge():
                 print (" [x] Got message to pass to hardware: " + themessage)
             
             if themessage == "kill":
-                to_hw.to_hw.put_nowait("kill")
+                self.to_hw.put_nowait("kill")
             else:
                 #default behavior get all
                 for somesensor in self.device.sensors:
