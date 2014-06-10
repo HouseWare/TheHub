@@ -1,8 +1,8 @@
-#TODO: Fully comment, constrain imports.
+#TODO: Fully comment.
 
 import datetime
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy import create_engine, Column, Boolean, Integer, String, CHAR, ForeignKey, DateTime
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb_test')
