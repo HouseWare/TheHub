@@ -29,7 +29,7 @@ class Bridge():
             self.stopped = True
             self.test = False
             
-            self.output = False
+            self.output = True
             
             if self.test:
                 self.fromhwtest = queue.Queue()
@@ -57,6 +57,8 @@ class Bridge():
                         #setup serial and start thread
                         self.myserial = serial.Serial(self.serialport, self.serialrate, timeout=1)
                         if (self.myserial.isOpen()):
+                                if self.output:
+                                    self.f.write("serial is open\n")
                                 mythread = threading.Thread(target=self.theprocess)
                                 mythread.start()
             else:
@@ -81,13 +83,15 @@ class Bridge():
                     #message for hardware
                     if (not(self.to_hw.empty())):
                         msg = str(self.to_hw.get_nowait())
+                        if self.output:
+                            self.f.write(" [*] Writing message to hardware: " + msg + "\n")
                         if (msg == 'kill'):
                             self.running = False
                             if self.output:
                                 self.f.write(" Got a kill command\n")
                         else:
                             if (not(self.test)):
-                                self.myserial.write(msg)
+                                self.myserial.write(bytes(msg, 'UTF-8'))
                             if self.output:
                                 self.f.write(" [*] Wrote message to hardware: " + msg + "\n")
                             
@@ -116,6 +120,7 @@ class Bridge():
                 
         def send_message(self, themessage):
             #translated_message = translate_message_tohw(themessage)
+            print ("message from hardware")
             if self.output:
                 print (" [x] Got message to pass to hardware: " + themessage)
             
@@ -123,16 +128,17 @@ class Bridge():
                 to_hw.to_hw.put_nowait("kill")
             else:
                 #default behavior get all
-                for somesensor in device.sensors:
-                
-                    if re.match("[A-Z][A-Z0-9]",sensor.id):
-                        self.to_hw.put_nowait(sensor.id);
+                for somesensor in self.device.sensors:
+                    print(somesensor.pin)
+                    if re.match("[A-Z][A-Z0-9]",somesensor.pin):
+                        self.to_hw.put_nowait(somesensor.pin);
                     else:
-                        print("Bad sensor ID: "+sensor.id)
+                        print("Bad sensor ID: "+somesensor.pin)
         
         
         #place holding for message translation
         def translate_message_tohw (themessage):
+            print ("message to hardware")
             #do some translating eventually
             outmessage = themessage
             return outmessage

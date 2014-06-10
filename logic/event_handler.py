@@ -10,7 +10,7 @@ Jeffrey Kuan
 import time
 import threading
 import queue
-import bridge
+#import bridge
 from ..database import db
 
 # Event handler class
@@ -33,8 +33,8 @@ class EventHandler:
     def run(self):
 
         # Main event loop
-        while running:
-            print "Running..."
+        while self.running:
+            print ("Running...")
             start = time.clock()    # Starts time delay
             self.refresh()
 
@@ -45,21 +45,21 @@ class EventHandler:
     # Queue push method
     # Parameter(s): a message to be pushed onto the queue
     def push(self, message):
-        print "Message pushed."
-        inbox.put(message)
+        print ("Message pushed.")
+        self.inbox.put(message)
 
     # Queue pop method
     # Parameter(s): n/a
     def pop(self):
 
         # No messages
-        if inbox.empty():
+        if self.inbox.empty():
             pass
 
         # Messages found
         else:
-            print "Message popped."
-            message = inbox.get()
+            print ("Message popped.")
+            message = self.inbox.get()
 
             # Sensor update received
             if not isinstance(message, str):
@@ -74,17 +74,17 @@ class EventHandler:
 
                 # Termination signal received
                 else:
-                    print "Shutting down..."
-                    running = False
+                    print ("Shutting down...")
+                    self.running = False
 
     # Request refreshed sensor values
     # Parameter(s): n/a
     def refresh(self):
 
-        print "Refreshing..."
+        print ("Refreshing...")
 
         # Send message to each device
-        for x in devices:
+        for x in self.devices:
             x.send_message("refresh")
 
     # Write sensor values to database and apply logic if necessary
@@ -95,13 +95,13 @@ class EventHandler:
         db.session.add_all([message])
         db.session.commit()
 
-        print "Database accessed."
+        print ("Database accessed.")
 
         # Door logic
         if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
 
             # Door open
-            if message.sensor.value == door_open_value:
+            if (message.sensor.value == door_open_value):
                 door_notification = db.Notification(read = False, value = "The door is open!", severity = notification)
                 db.session.add_all([door_notification])
                 db.session.commit()
@@ -112,14 +112,14 @@ class EventHandler:
             # Temperature high
             if (message.value > temp_high_value):
                 temp_notification = db.Notification(read = False, value = "The temperature is over 9000!", severity = notification)
-                db.session.add_all([temp_notification)
+                db.session.add_all([temp_notification])
                 db.session.commit()
 
         # Light logic
         if (isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)):
 
             # Light high
-            if message.value > light_on_value:
+            if (message.value > light_on_value):
                 light_notification = db.Notification(read = False, value = "The light is on!", severity = notification)
                 db.session.add_all([light_notification])
                 db.session.commit()
