@@ -130,7 +130,7 @@ class Bridge():
             else:
                 #default behavior get all
                 for somesensor in self.device.sensors:
-                    print(somesensor.pin)
+                    #print(somesensor.pin)
                     if re.match("[A-Z][A-Z0-9]",somesensor.pin):
                         self.to_hw.put_nowait(somesensor.pin);
                     else:
@@ -156,10 +156,11 @@ class Bridge():
 
                 #create dataeven object and return
                 if db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).count()>0:
+                    #db.session.commit()
                     thesensor = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).all()[0]
                     #db.session.commit()
                     outmessage = db.DataEvent(device = self.device, sensor = thesensor, value =int(themessage[3:6]))
-                   # db.session.commit()
+                    #db.session.commit()
                     if self.output:
                         print("created data event")
                 
