@@ -97,13 +97,14 @@ class Bridge():
                             
                             
                     if (not(self.test)):#not a test
-                        hw_msg = str(self.myserial.readline())                        
-                        if (hw_msg != ""):#got a message from the hardward
-                                if self.output:
-                                    self.f.write(" [x] Got message from hardware: " + hw_msg + "\n")
+                        hw_msg = self.myserial.readline().decode('utf8')                        
+#                        if (hw_msg != b''):#got a message from the hardward
+                        if self.output:
+                            self.f.write(" [x] Got message from hardware: " + hw_msg + "\n")
+                            print(" [x] Got message from hardware: " + hw_msg + "\n")
+                        if (hw_msg!=""):#got a message from the hardward
+                                
                                 self.from_hw.put_nowait(self.translate_message_fromhw(hw_msg))
-                                if self.output:
-                                    self.f.write(" [x] Translated message from hardware: " + self.translate_message_fromhw(hw_msg) + "\n")
                                 
                     else:#is a test
                         if (not( self.fromhwtest.empty())):
@@ -147,12 +148,20 @@ class Bridge():
             #do some translating            
             outmessage = ""
             if themessage[0] == "V":
-                
+                print("sensor: "+themessage[1:4])
                 #get appropriate sensor object
-                thesensor = db.session.query(db.Sensor).filter(device_id=mydevice.id).filter(pin=themessage[1:3]).all()[0]
-                
+                #db.session.commit()
+                #thesensors = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4])
+                #db.session.commit()
+
                 #create dataeven object and return
-                outmessage = db.DataEvent(device = self.device, sensor = thesensor, value = int(themessage[3:6]))
+                if db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).count()>0:
+                    thesensor = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).all()[0]
+                    #db.session.commit()
+                    outmessage = db.DataEvent(device = self.device, sensor = thesensor, value =int(themessage[3:6]))
+                   # db.session.commit()
+                    if self.output:
+                        print("created data event")
                 
             return outmessage
 

@@ -73,7 +73,8 @@ class EventHandler:
                     self.refresh()
 
                 # Termination signal received
-                else:
+                elif message =='kill':
+                #else:
                     print ("Shutting down...")
                     self.running = False
 
@@ -98,7 +99,8 @@ class EventHandler:
         print ("Database accessed.")
 
         # Door logic
-        if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
 
             # Door open
             if (message.sensor.value == door_open_value):
@@ -107,7 +109,8 @@ class EventHandler:
                 db.session.commit()
 
         # Temperature logic
-        if (isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)):
 
             # Temperature high
             if (message.value > temp_high_value):
@@ -116,7 +119,8 @@ class EventHandler:
                 db.session.commit()
 
         # Light logic
-        if (isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)):
 
             # Light high
             if (message.value > light_on_value):
