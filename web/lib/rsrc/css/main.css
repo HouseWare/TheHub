@@ -21,3 +21,25 @@ table.event-table td {
     width:50%;
     text-align:center;
 }
+
+.bar { 
+    fill: steelblue;
+}
+.bar:hover {
+    fill:skyblue;
+}
+
+.axis text {
+    font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.x.axis path {
+    display:none;
+}
