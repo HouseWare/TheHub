@@ -45,24 +45,32 @@ Password: <input name="password" type="password" placeholder="password" />
 def get_devices():
     devicesQuery = db.session.query(db.Device)
     devicesAsJson = list(map(lambda device: device.to_dictionary(), devicesQuery))
+    db.session.close()
+    db.session = db.Session(bind=db.engine)
     return { 'devices' : devicesAsJson }
 
 @get('/api/device/<device_id>/getsensors')
 def get_sensors(device_id):
     sensorsQuery = db.session.query(db.Device).filter(db.Device.id == device_id)
     sensorsAsJson = list(map(lambda sensor: sensor.to_dictionary(), sensorsQuery.one().sensors))
+    db.session.close()
+    db.session = db.Session(bind=db.engine)
     return { 'sensors' : sensorsAsJson }
 
 @get('/api/sensor/<sensor_id>/getevents/<timestamp>')
 def get_sensor_events(sensor_id, timestamp):
     data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
     data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))
+    db.session.close()
+    db.session = db.Session(bind=db.engine)
     return { 'data_events' : data_events_json }
 
 @get('/api/notifications')
 def get_notifications():
     unread_notifications = db.session.query(db.Notification).filter(db.Notification.read == False)
     json_notifications = list(map(lambda notification: notification.to_dictionary(), unread_notifications))
+    db.session.close()
+    db.session = db.Session(bind=db.engine)
     return { 'notifications' : json_notifications }
 
 @post('/api/notifications/<notification_id>/markread')
@@ -70,6 +78,8 @@ def mark_notification(notification_id):
     notification = db.session.query(db.Notification).filter(db.Notification.id == notification_id).one()
     notification.read = True
     db.session.commit()
+    db.session.close()
+    db.session = db.Session(bind=db.engine)
     response.status = 200
     return { 'success' : 'true' }
 
