@@ -64,7 +64,7 @@ void DigitalRead(int pin){
 }
 
 void AnalogRead(int pin){
-  sprintf(out, "VD%i%03d", pin, analogRead(pin));
+  sprintf(out, "VA%i%03d", pin, analogRead(pin));
   sendMsg();
 }
 
