@@ -79,13 +79,16 @@ function get_sensor_data(sensor_id) {
 	    .attr("class", "y axis")
 	    .call(yAxis);
 
-	chart.selectAll(".bar")
+	var bars = chart.selectAll(".bar")
 	    .data(data)
-	    .enter().append("rect")
+	    .enter().append("rect");
+
+	bars.transition()
 	    .attr("class", "bar")
 	    .attr("x", function(d) { return x(d.timestamp); })
 	    .attr("y", function(d) { return y(d.value); })
+	    .delay(function(d,i) { return i * 5; })
 	    .attr("height", function(d) { return height - y(d.value); })
-	    .attr("width", x.rangeBand());
+	    .attr("width", x.rangeBand()-1);
     });
 };
