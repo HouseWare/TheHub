@@ -47,8 +47,8 @@ function get_sensors(device_id) {
 };
 
 function get_sensor_data(sensor_id) {
-
-    $.get('/api/sensor/' + sensor_id + '/getevents/2014-01-01+00:00:00', function(response) {
+	
+    $.get('/api/sensor/' + sensor_id + '/getevents/100', function(response) {
 	var data = response.data_events;
 	var margin = {top: 20, right: 30, bottom: 30, left: 40},
 	width = 960 - margin.left - margin.right,
