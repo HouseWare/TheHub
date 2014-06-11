@@ -8,9 +8,11 @@ Jeffrey Kuan
 
 # Imports
 import time
-import threading
+
 import queue
 #import bridge
+from sqlalchemy import *
+from sqlalchemy.orm import *
 from ..database import db
 
 # Event handler class
@@ -22,11 +24,19 @@ class EventHandler:
     temp_high_value   = 63
     light_on_value  = 511
 
+
+
     # Class constructor
     # Parameter(s): a queue for messages and an array of devices
     def __init__(self, inbox, devices):
         self.inbox = inbox
         self.devices = devices
+        #session_factory = db.sessionmaker(bind=db.engine)
+        #Session = db.scoped_session(session_factory)
+        #self.session = Session()
+        #self.session = db.session
+        #self.engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb_test')
+        #self.session = sessionmaker(bind=self.engine)()
 
     # Main run method
     # Parameter(s): n/a
@@ -39,7 +49,7 @@ class EventHandler:
             self.refresh()
 
             # Check queue for messages
-            while time.clock() < (start + 60):
+            while time.clock() < (start + 10): #(start + 60):
                 self.pop()
 
     # Queue push method
@@ -62,7 +72,9 @@ class EventHandler:
             message = self.inbox.get()
 
             # Sensor update received
-            if not isinstance(message, str):
+            #if not isinstance(message, str):
+            if message[0] == "V":
+
                self.write(message)
 
             # Other message received
@@ -73,7 +85,8 @@ class EventHandler:
                     self.refresh()
 
                 # Termination signal received
-                else:
+                elif message =='kill':
+                #else:
                     print ("Shutting down...")
                     self.running = False
 
@@ -89,16 +102,18 @@ class EventHandler:
 
     # Write sensor values to database and apply logic if necessary
     # Parameter(s): a database statement
-    def write(self, message):
+    def write(self, themessage):
+        message = self.translate_message_from_device(themessage)
 
         # Pass to database
-        db.session.add_all([message])
+        db.session.add(message)
         db.session.commit()
 
         print ("Database accessed.")
 
         # Door logic
-        if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_door_sensor) or isinstance(message.sensor, wireless_door_sensor)):
 
             # Door open
             if (message.sensor.value == door_open_value):
@@ -107,7 +122,8 @@ class EventHandler:
                 db.session.commit()
 
         # Temperature logic
-        if (isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_temp_sensor) or isinstance(message.sensor, wireless_temp_sensor)):
 
             # Temperature high
             if (message.value > temp_high_value):
@@ -116,7 +132,8 @@ class EventHandler:
                 db.session.commit()
 
         # Light logic
-        if (isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)):
+        if False:
+        #if (isinstance(message.sensor, wired_light_sensor) or isinstance(message.sensor, wireless_light_sensor)):
 
             # Light high
             if (message.value > light_on_value):
@@ -128,3 +145,23 @@ class EventHandler:
     # Parameter(s): n/a
     def __del__(self):
         pass
+
+    def translate_message_from_device (self,themessage):       
+        outmessage = ""
+        if themessage[0] == "V":
+            print("device: "+themessage[1:4])
+            print("sensor: "+themessage[4:6])
+            print("value: "+themessage[6:9])
+
+
+            sensors = db.session.query(db.Sensor).filter(db.Sensor.device_id == int(themessage[1:4])).filter(db.Sensor.pin == themessage[4:6])
+
+            if sensors.count()>0:
+
+                thesensor = sensors.all()[0]
+
+                outmessage = db.DataEvent(device_id = thesensor.device_id, sensor = thesensor, value =int(themessage[6:9]))
+            else:
+                print("invalid sensor ID")
+  
+        return outmessage
