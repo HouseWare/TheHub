@@ -11,7 +11,7 @@ devices = db.session.query(db.Device).all()
 event_queue = queue.Queue()
 
 # Instantiate bridge object(s).
-bridge_devices = [bridge.Bridge(event_queue, devices[0])]
+bridge_devices = [bridge.Bridge(event_queue, devices[0].id, devices[0].sensors)]#devices[0], devices[0].sensors)]
 
 # Create a list of bridge devices to give to the event loop. 
 #devices = [device]

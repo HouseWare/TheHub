@@ -7,6 +7,8 @@ import serial
 import queue
 import threading
 import re
+from sqlalchemy import *
+from sqlalchemy.orm import *
 from ..database import db
 
 
@@ -14,9 +16,11 @@ from ..database import db
 class Bridge():
 
     
-        def __init__(self, from_hw_queue, device):
+        def __init__(self, from_hw_queue, device_id, sensors):
 
-            self.device = device;
+#            self.device = device
+            self.sensors = sensors
+            self.device_id = device_id
 
 
             self.from_hw = from_hw_queue
@@ -30,6 +34,17 @@ class Bridge():
             self.test = False
             
             self.output = True
+
+#            self.engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb_test')
+#            self.session = sessionmaker(bind=self.engine)()
+
+
+#            session_factory = db.sessionmaker(bind=db.engine)
+#            Session = db.scoped_session(session_factory)
+#            self.session = Session()
+#            self.session = db.session
+
+
             
             if self.test:
                 self.fromhwtest = queue.Queue()
@@ -129,7 +144,7 @@ class Bridge():
                 self.to_hw.put_nowait("kill")
             else:
                 #default behavior get all
-                for somesensor in self.device.sensors:
+                for somesensor in self.sensors:
                     #print(somesensor.pin)
                     if re.match("[A-Z][A-Z0-9]",somesensor.pin):
                         self.to_hw.put_nowait(somesensor.pin);
@@ -148,22 +163,28 @@ class Bridge():
             #do some translating            
             outmessage = ""
             if themessage[0] == "V":
-                print("sensor: "+themessage[1:4])
+                print("sensor: "+themessage[1:3])
                 #get appropriate sensor object
                 #db.session.commit()
                 #thesensors = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4])
                 #db.session.commit()
 
                 #create dataeven object and return
-                if db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).count()>0:
+#                if self.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).count()>0:
                     #db.session.commit()
-                    thesensor = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).all()[0]
+#                    thesensor = self.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).all()[0]
                     #db.session.commit()
-                    outmessage = db.DataEvent(device = self.device, sensor = thesensor, value =int(themessage[3:6]))
+#                    outmessage = db.DataEvent(device = self.device, sensor = thesensor, value =int(themessage[3:6]))
                     #db.session.commit()
-                    if self.output:
-                        print("created data event")
-                
+#                    if self.output:
+#                        print("created data event")
+
+                #for somesensor in self.sensors:
+                    #print(somesensor.pin)
+                    #if themessage[1:4] == somesensor.pin:
+#                        outmessage = themessage[0]+str(somesensor.id).zfill(3) +themessage[4:]
+                outmessage = themessage[0]+str(self.device_id).zfill(3)+themessage[1:]
+                print("sent to loop" + outmessage)
             return outmessage
 
         def __del__(self):
