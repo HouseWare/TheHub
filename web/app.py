@@ -57,9 +57,9 @@ def get_sensors(device_id):
     db.session = db.Session(bind=db.engine)
     return { 'sensors' : sensorsAsJson }
 
-@get('/api/sensor/<sensor_id>/getevents/<timestamp>')
-def get_sensor_events(sensor_id, timestamp):
-    data_events = db.session.query(db.DataEvent).filter(and_(db.DataEvent.sensor_id == sensor_id, db.DataEvent.timestamp >= timestamp))
+@get('/api/sensor/<sensor_id>/getevents/<limit>')
+def get_sensor_events(sensor_id, limit):
+    data_events = db.session.query(db.DataEvent).filter(db.DataEvent.sensor_id == sensor_id).order_by(db.DataEvent.timestamp.desc()).limit(limit)
     data_events_json = list(map(lambda data_event: data_event.to_dictionary(), data_events))
     db.session.close()
     db.session = db.Session(bind=db.engine)
