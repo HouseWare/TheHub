@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="/rsrc/js/main.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="large-12 columns">
+    <h3>Control Center</h3>
+  </div>
+</div>
+
+<div class="row">
+  <div class="large-3 medium-4 small-5 columns">
+    <div class="panel">
+      <ul class="side-nav device-list">
+      </ul>
+    </div>
+  </div>
+  <div class="large-9 medium-8 small-7 columns">
+    <ul class="button-group sensor-btn-group">
+    </ul>
+    <div class="row">
+      <div class="small-12 columns">
+	<div class="sensor-content">
+	  <svg class="chart"></svg>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+&copy - HouseWare LLC 2014
+{% endblock %}

@@ -38,3 +38,8 @@ node_modules
 #python things
 *.pyc
 
+#bower things
+bower_components
+
+# Bower
+/web/bower_components/*

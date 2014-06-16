@@ -1,0 +1,45 @@
+body {
+
+}
+
+div.fixed.contain-to-grid,
+.top-bar-section li > a {
+    max-height:45px;
+}
+
+.top-bar-section .has-dropdown > a {
+    padding:0;
+}
+.top-bar-section .has-dropdown > a:after {
+    border-color: transparent transparent transparent;
+}
+
+table.event-table {
+    width:90%;
+}
+table.event-table td {
+    width:50%;
+    text-align:center;
+}
+
+.bar { 
+    fill: steelblue;
+}
+.bar:hover {
+    fill:skyblue;
+}
+
+.axis text {
+    font: 11px sans-serif;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.x.axis path {
+    display:none;
+}

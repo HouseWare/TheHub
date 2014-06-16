@@ -1,112 +1,193 @@
 #!/usr/bin/env python
 
+
 import sys
-import pika
+import time
 import serial
-import Queue
+import queue
 import threading
+import re
+from sqlalchemy import *
+from sqlalchemy.orm import *
+from ..database import db
 
-# get the name of the package from program arguments
-package_name = str(sys.argv[1])
 
-# how we know whether we're done (hint, we're not done yet)
-running = True
 
-# thread-safe queues to hold messages
-to_hw = Queue.Queue()
-from_hw = Queue.Queue()
+class Bridge():
 
-# credentials for access to the RabbitMQ server
-credentials = pika.PlainCredentials('hub', 'HubWub!')
+    
+        def __init__(self, from_hw_queue, device_id, sensors):
 
-# the connection to use for asynchronous callbacks
-callback_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
+#            self.device = device
+            self.sensors = sensors
+            self.device_id = device_id
 
-# the connection we'll use to publish messages on
-publish_connection = pika.BlockingConnection(pika.ConnectionParameters(
-        'localhost',
-        5672,
-        '/',
-        credentials))
 
-# setup both our callback channel and our publishing channel using connections
-callback_channel = callback_connection.channel()
-publish_channel = publish_connection.channel()
+            self.from_hw = from_hw_queue
+            
+            self.to_hw = queue.Queue()
+            self.running = True
+            self.serialport = '/dev/ttyUSB0'
+            self.serialrate = 9600
+            self.myserial = None
+            self.stopped = True
+            self.test = False
+            
+            self.output = True
 
-def broadcast_callback(ch, method, properties, body):
-    # if we get a kill message then stop consuming on the channel
-    if (str(body) == 'kill'):
-        callback_channel.stop_consuming()
-   
-    # place the message into the 'To Hardware' queue 
-    to_hw.put_nowait(body)
+#            self.engine = create_engine('mysql+pymysql://thehub:cas0iWur@localhost:3306/hubdb_test')
+#            self.session = sessionmaker(bind=self.engine)()
 
-def package_callback(ch, method, properties, body):
-    # if we get a kill message then stop consuming on the channel
-    if (str(body) == 'kill'):
-        callback_channel.stop_consuming()
-   
-    # place the message into the 'To Hardware' queue 
-    to_hw.put_nowait(body)
 
-# assign broadcast_callback to consumer for package.bcast
-callback_channel.basic_consume(broadcast_callback,
-                      queue='package.bcast',
-                      no_ack=True)
+#            session_factory = db.sessionmaker(bind=db.engine)
+#            Session = db.scoped_session(session_factory)
+#            self.session = Session()
+#            self.session = db.session
 
-# assign package_callback to consumer for package.<insert name here>
-callback_channel.basic_consume(package_callback,
-                      queue='package.' + package_name,
-                      no_ack=True)
 
-# create a new thread object to start consuming on the callback channel
-rabbit = threading.Thread(target=callback_channel.start_consuming)
+            
+            if self.test:
+                self.fromhwtest = queue.Queue()
+            if self.output:
+                self.f = open('bridge_file.txt', 'a')
+                
+            self.start()
 
-# start the thread
-rabbit.start()
+        #stop, send the kill message to the thread
+        def stop(self):
+            self.to_hw.put_nowait("kill")
 
-# establish serial connection with hardware. reads timeout in 1 second
-package = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
 
-# main loop
-while running:
-
-    if (not(to_hw.empty())):
+        def start(self):
+            if self.output:
+                self.f.write("starting\n")
+            #check that required information is set
+            if ((self.from_hw != None) and (self.serialport != None) and (self.serialrate != None) and self.stopped):
+                if (self.test):#testing
+                        mythread = threading.Thread(target=self.theprocess)
+                        if self.output:
+                            self.f.write("starting process\n")
+                        mythread.start()
+                else:
+                        #setup serial and start thread
+                        self.myserial = serial.Serial(self.serialport, self.serialrate, timeout=1)
+                        if (self.myserial.isOpen()):
+                                if self.output:
+                                    self.f.write("serial is open\n")
+                                mythread = threading.Thread(target=self.theprocess)
+                                mythread.start()
+            else:
+                #kick and scream
+                
+                if (self.from_hw == None):
+                    print("from Hardware queue not yet set")
+                if (self.serialport == None):
+                    print("Serial Port not set")
+                if (self.serialrate == None):
+                    print("Serial Rate not set")
+                if not(self.stopped):
+                    print("Already running");
+                    
         
-        # pull a message off the 'To Hardware' queue
-        msg = str(to_hw.get_nowait())
+                    
+        def theprocess(self):
+                self.stopped = False
+                self.running = True
+                while self.running:
+                                        
+                    #message for hardware
+                    if (not(self.to_hw.empty())):
+                        msg = str(self.to_hw.get_nowait())
+                        if self.output:
+                            self.f.write(" [*] Writing message to hardware: " + msg + "\n")
+                        if (msg == 'kill'):
+                            self.running = False
+                            if self.output:
+                                self.f.write(" Got a kill command\n")
+                        else:
+                            if (not(self.test)):
+                                self.myserial.write(bytes(msg, 'UTF-8'))
+                            if self.output:
+                                self.f.write(" [*] Wrote message to hardware: " + msg + "\n")
+                            
+                            
+                    if (not(self.test)):#not a test
+                        hw_msg = self.myserial.readline().decode('utf8')                        
+#                        if (hw_msg != b''):#got a message from the hardward
 
-        if (msg == 'kill'):
-            # welp, looks like we're done now
-            running = False
-        else:
-            # send the message off to the hardware over serial            
-            package.write(msg)
+                        if (hw_msg!=""):#got a message from the hardward
+                            if self.output:
+                                self.f.write(" [x] Got message from hardware: " + hw_msg + "\n")
+                                print(" [x] Got message from hardware: " + hw_msg + "\n")                                
+                            self.from_hw.put_nowait(self.translate_message_fromhw(hw_msg))
+                                
+                    else:#is a test
+                        if (not( self.fromhwtest.empty())):
+                            hw_msg = self.fromhwtest.get()            
+                            if self.output:                
+                                print (" [x] Got test message from hardware: " + hw_msg)
+                            self.from_hw.put_nowait(self.translate_message_fromhw(hw_msg))                    
+                            
 
-    # read a message from hardware. susceptible to 1 second timeout 
-    hw_msg = str(package.readline())
+                if (not(self.test)):#not a test, clean up
+                        self.myserial.close()
+                self.stopped = True
+                
+                
+        def send_message(self, themessage):
+            #translated_message = translate_message_tohw(themessage)
+            print ("message from hardware")
+            if self.output:
+                print (" [x] Got message to pass to hardware: " + themessage)
+            
+            if themessage == "kill":
+                self.to_hw.put_nowait("kill")
+            else:
+                #default behavior get all
+                for somesensor in self.sensors:
+                    #print(somesensor.pin)
+                    if re.match("[A-Z][A-Z0-9]",somesensor.pin):
+                        self.to_hw.put_nowait(somesensor.pin);
+                    else:
+                        print("Bad sensor ID: "+somesensor.pin)
+        
+        
+        #place holding for message translation
+        def translate_message_tohw (themessage):
+            print ("message to hardware")
+            #do some translating eventually
+            outmessage = themessage
+            return outmessage
 
-    if (hw_msg != ""):
-        # place the non-blank message into the 'From Hardware' queue
-        from_hw.put_nowait(hw_msg)
+        def translate_message_fromhw (self,themessage):
+            #do some translating            
+            outmessage = ""
+            if themessage[0] == "V":
+                print("sensor: "+themessage[1:3])
+                #get appropriate sensor object
+                #db.session.commit()
+                #thesensors = db.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4])
+                #db.session.commit()
 
-    if (not(from_hw.empty())):
+                #create dataeven object and return
+#                if self.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).count()>0:
+                    #db.session.commit()
+#                    thesensor = self.session.query(db.Sensor).filter(db.Sensor.device_id==self.device.id).filter(db.Sensor.pin==themessage[1:4]).all()[0]
+                    #db.session.commit()
+#                    outmessage = db.DataEvent(device = self.device, sensor = thesensor, value =int(themessage[3:6]))
+                    #db.session.commit()
+#                    if self.output:
+#                        print("created data event")
 
-        # cast the message as a string, publish it to the 'From Hardware' queue 
-        message =  str(from_hw.get_nowait())
-        publish_channel.basic_publish(exchange='hub',
-            routing_key='logic.package.' + package_name,
-            body=message)
+                #for somesensor in self.sensors:
+                    #print(somesensor.pin)
+                    #if themessage[1:4] == somesensor.pin:
+#                        outmessage = themessage[0]+str(somesensor.id).zfill(3) +themessage[4:]
+                outmessage = themessage[0]+str(self.device_id).zfill(3)+themessage[1:]
+                print("sent to loop" + outmessage)
+            return outmessage
 
-# shut down all the connections and get outta dodge
-package.close()
-publish_channel.close()
-callback_connection.close()
-publish_connection.close()
-
-# delete the thread object, just in case
-del rabbit
+        def __del__(self):
+            #if self.output:
+            #    self.f.close()
+            pass

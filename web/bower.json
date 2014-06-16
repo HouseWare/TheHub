@@ -1,0 +1,20 @@
+{
+  "name": "thehub",
+  "version": "1.0.0",
+  "authors": [
+    "Reilly Tucker Siemens <reilly.siemens@gmail.com>"
+  ],
+  "description": "Front-end dependencies for TheHub.",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "foundation": "~5.1.1",
+    "foundation-icon-fonts": "*"
+  }
+}
